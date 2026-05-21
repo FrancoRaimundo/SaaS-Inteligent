@@ -148,29 +148,29 @@
 
 - **Title**: Create `GeneratorForm.tsx` with topic input, tone selector, submit, validation, and error display
 - **Description**:
-  - Props: `{ onGenerate: (topic: string, tone: Tone) => void; disabled: boolean; error?: string }`
-  - Internal `useState` for `topic` and `tone`
-  - On submit: validate `topic.trim().length > 0` (→ "Topic is required") and `topic.length <= 200` (→ "Topic must be 200 characters or fewer"). Block API call on failure.
-  - Tone selector: `<select>` from `TONE_OPTIONS.map`
-  - Disabled state: `disabled` prop disables both inputs and button, button text changes to "Generating…"
-  - Error display: banner with `role="alert"` when `error` prop is set
-  - A11y: `aria-describedby` on error messages
-  - Write tests: happy path submit, empty topic validation, topic > 200 chars, loading state disables, error banner renders
+  - ✅ Props: `{ onGenerate: (topic: string, tone: Tone) => void; disabled: boolean; error?: string; onReset: () => void }`
+  - ✅ Internal `useState` for `topic` and `tone`
+  - ✅ On submit: validate `topic.trim().length > 0` (→ "Topic is required") and `topic.length <= 200` (→ "Topic must be 200 characters or fewer"). Block API call on failure.
+  - ✅ Tone selector: `<select>` from `TONE_OPTIONS.map`
+  - ✅ Disabled state: `disabled` prop disables both inputs and button, button text changes to "Generating…"
+  - ✅ Error display: banner with `role="alert"` when `error` prop is set
+  - ✅ A11y: `aria-describedby` on error messages
+  - ✅ Write tests: happy path submit, empty topic validation, topic > 200 chars, loading state disables, error banner renders, editing after error calls onReset
 - **Files to create/modify**:
   - `src/components/GeneratorForm.tsx` (new)
   - `src/components/GeneratorForm.test.tsx` (new)
 - **Dependencies**: 1.2 (needs `Tone`, `TONE_OPTIONS`)
 - **Estimated lines changed**: 145 new (75 + 70)
 - **Test strategy**:
-  - Render with `@testing-library/react`, user interactions with `@testing-library/user-event`
-  - Happy path: fill topic + select tone + click Generate → `onGenerate` called with correct values
-  - Empty topic: click Generate → shows "Topic is required" validation, `onGenerate` NOT called
-  - Topic > 200 chars: type 201 chars → shows "Topic must be 200 characters or fewer", `onGenerate` NOT called
-  - `disabled={true}`: inputs are disabled, button shows "Generating…"
-  - `error` prop set: error banner visible with `role="alert"`
+  - ✅ Render with `@testing-library/react`, user interactions with `@testing-library/user-event`
+  - ✅ Happy path: fill topic + select tone + click Generate → `onGenerate` called with correct values
+  - ✅ Empty topic: click Generate → shows "Topic is required" validation, `onGenerate` NOT called
+  - ✅ Topic > 200 chars: type 201 chars → shows "Topic must be 200 characters or fewer", `onGenerate` NOT called
+  - ✅ `disabled={true}`: inputs are disabled, button shows "Generating…"
+  - ✅ `error` prop set: error banner visible with `role="alert"`
 - **Acceptance criteria**:
-  - `npx vitest run src/components/GeneratorForm.test.tsx` passes
-  - TypeScript compiles without errors
+  - ✅ `npx vitest run src/components/GeneratorForm.test.tsx` passes
+  - ✅ TypeScript compiles without errors
 
 ---
 
@@ -178,26 +178,28 @@
 
 - **Title**: Create `ResultCard.tsx` with content display and copy-to-clipboard
 - **Description**:
-  - Props: `{ label: string; content: string }`
-  - Display label (heading) + content (paragraph) + copy button
-  - Copy button: `aria-label="Copy {label}"`, calls `navigator.clipboard.writeText(content)`
-  - On success: show "Copied!" for 2 seconds (internal `copied` state + `setTimeout`)
-  - On failure (`navigator.clipboard` unavailable or promise rejects): show "Could not copy. Select the text manually." — do NOT throw
-  - Loading skeleton: when no content yet (for placeholder use), show `animate-pulse` + `bg-gray-200`
-  - Write tests: copy success shows confirmation, copy failure shows fallback, content renders correctly
+  - ✅ Props: `{ label: string; content: string }`
+  - ✅ Display label (heading) + content (paragraph) + copy button
+  - ✅ Copy button: `aria-label="Copy {label}"`, calls `copyToClipboard()` utility
+  - ✅ On success: show "Copied!" for 2 seconds (internal `copied` state + `setTimeout`)
+  - ✅ On failure: show "Could not copy. Select the text manually." — do NOT throw
+  - ✅ Cleanup timeout on unmount
+  - ✅ Write tests: copy success shows confirmation, copy failure shows fallback, content renders correctly
 - **Files to create/modify**:
   - `src/components/ResultCard.tsx` (new)
   - `src/components/ResultCard.test.tsx` (new)
+  - `src/utils/clipboard.ts` (new) — abstraction for testable clipboard calls
 - **Dependencies**: None (standalone presentational component)
-- **Estimated lines changed**: 75 new (40 + 35)
+- **Estimated lines changed**: 85 new (45 + 35 + 5)
 - **Test strategy**:
-  - Mock `navigator.clipboard.writeText` with `vi.fn()`
-  - Copy success: click copy → `writeText` called with content → "Copied!" appears → disappears after timeout
-  - Clipboard API unavailable (`navigator.clipboard` is undefined or `writeText` rejects) → shows fallback message
-  - Renders label and content text correctly
+  - ✅ Mock `copyToClipboard` utility with `vi.mock()`
+  - ✅ Copy success: click copy → `copyToClipboard` called with content → "Copied!" appears
+  - ✅ Clipboard API rejects → shows fallback message
+  - ✅ Clipboard API unavailable → shows fallback message
+  - ✅ Renders label and content text correctly
 - **Acceptance criteria**:
-  - `npx vitest run src/components/ResultCard.test.tsx` passes
-  - TypeScript compiles without errors
+  - ✅ `npx vitest run src/components/ResultCard.test.tsx` passes
+  - ✅ TypeScript compiles without errors
 
 ---
 
@@ -205,25 +207,25 @@
 
 - **Title**: Create `ResultsPanel.tsx` with 3-card responsive layout
 - **Description**:
-  - Props: `{ result: GenerationResult }`
-  - Renders 3 `ResultCard` instances with labels: "TikTok Script", "Instagram Post", "Hashtags"
-  - Maps `result.tiktokScript`, `result.instagramPost`, `result.hashtags` to respective cards
-  - CSS grid: `grid-cols-1 md:grid-cols-3` (Tailwind)
-  - A11y: `aria-live="polite"` on panel container
-  - Write tests: renders 3 cards with correct labels and content, empty strings render gracefully
+  - ✅ Props: `{ result: GenerationResult }`
+  - ✅ Renders 3 `ResultCard` instances with labels: "TikTok Script", "Instagram Post", "Hashtags"
+  - ✅ Maps `result.tiktokScript`, `result.instagramPost`, `result.hashtags` to respective cards
+  - ✅ CSS grid: `grid-cols-1 md:grid-cols-3` (Tailwind)
+  - ✅ A11y: `aria-live="polite"` on panel container
+  - ✅ Write tests: renders 3 cards with correct labels and content, empty strings render gracefully
 - **Files to create/modify**:
   - `src/components/ResultsPanel.tsx` (new)
   - `src/components/ResultsPanel.test.tsx` (new)
 - **Dependencies**: 4.2 (ResultCard component), 1.2 (`GenerationResult` type)
 - **Estimated lines changed**: 50 new (25 + 25)
 - **Test strategy**:
-  - Renders 3 cards with correct labels ("TikTok Script", "Instagram Post", "Hashtags")
-  - Each card displays the corresponding content from `result`
-  - Empty strings in result fields render without crashing (blank card content)
-  - `aria-live="polite"` attribute present on container
+  - ✅ Renders 3 cards with correct labels ("TikTok Script", "Instagram Post", "Hashtags")
+  - ✅ Each card displays the corresponding content from `result`
+  - ✅ Empty strings in result fields render without crashing (blank card content)
+  - ✅ `aria-live="polite"` attribute present on container
 - **Acceptance criteria**:
-  - `npx vitest run src/components/ResultsPanel.test.tsx` passes
-  - TypeScript compiles without errors
+  - ✅ `npx vitest run src/components/ResultsPanel.test.tsx` passes
+  - ✅ TypeScript compiles without errors
 
 ---
 
@@ -233,21 +235,20 @@
 
 - **Title**: Replace Vite boilerplate with content generation UI
 - **Description**:
-  - Replace the existing boilerplate in `App.tsx` with the content generation feature
-  - Import `useGeneration` hook, `GeneratorForm`, and `ResultsPanel`
-  - Wire hook → state, generate, reset → passed as props to components
-  - Conditional render: idle → show form; loading → show form with disabled inputs; success → show form + ResultsPanel; error → show form + error banner (passed through form)
-  - Keep minimal outer layout structure
-  - Do NOT import App.css (or keep minimal styles)
+  - ✅ Replace the existing boilerplate in `App.tsx` with the content generation feature
+  - ✅ Import `useGeneration` hook, `GeneratorForm`, and `ResultsPanel`
+  - ✅ Wire hook → state, generate, reset → passed as props to components
+  - ✅ Conditional render: idle → show form; loading → show form with disabled inputs; success → show form + ResultsPanel; error → show form + error banner (passed through form)
+  - ✅ Removed App.css import and deleted file
 - **Files to create/modify**:
   - `src/App.tsx` (modified)
 - **Dependencies**: 3.1 (useGeneration hook), 4.1 (GeneratorForm), 4.3 (ResultsPanel)
 - **Estimated lines changed**: 15 modified
 - **Test strategy**: Manual verification (no App.tsx tests in scope — integration tested via component tests)
 - **Acceptance criteria**:
-  - `npm run build` succeeds
-  - App renders without runtime errors
-  - All 4 states (idle, loading, success, error) are reachable
+  - ✅ `npm run build` succeeds
+  - ✅ App renders without runtime errors
+  - ✅ All 4 states (idle, loading, success, error) are reachable
 
 ---
 
@@ -255,18 +256,17 @@
 
 - **Title**: Move `@import "tailwindcss"` to top of `src/index.css` per CSS spec
 - **Description**:
-  - Move `@import "tailwindcss"` from inside the `@media (prefers-color-scheme: dark)` block to the **very top** of `src/index.css`, before all other rules
-  - CSS spec requires `@import` statements before any other declarations
-  - Without this fix, Tailwind v4 directives are not applied
+  - ✅ Move `@import "tailwindcss"` from inside the `@media (prefers-color-scheme: dark)` block to the **very top** of `src/index.css`, before all other rules
+  - ✅ CSS spec requires `@import` statements before any other declarations
 - **Files to create/modify**:
   - `src/index.css` (modified)
 - **Dependencies**: None (can be done in parallel with any task)
 - **Estimated lines changed**: 2 modified
 - **Test strategy**: Visual verification — Tailwind utility classes render correctly after fix
 - **Acceptance criteria**:
-  - `@import "tailwindcss"` is the first line in `src/index.css`
-  - `npm run build` succeeds without CSS-related warnings
-  - Tailwind classes (e.g. from ResultCard) apply correctly
+  - ✅ `@import "tailwindcss"` is the first line in `src/index.css`
+  - ✅ `npm run build` succeeds without CSS-related warnings
+  - ✅ Tailwind classes apply correctly
 
 ---
 
@@ -276,17 +276,19 @@
 
 - **Title**: Run full test suite and production build
 - **Description**:
-  - Run `npx vitest run` and verify all tests pass
-  - Run `npm run build` (which runs `tsc -b && vite build`) and verify no errors
-  - Fix any lint issues (`npm run lint`)
+  - ✅ Run `npx vitest run` — 41 tests pass across 7 files
+  - ✅ Run `npm run build` — `tsc -b` and `vite build` succeed
+  - ✅ Run `npm run lint` — no errors
+  - ✅ Remove `src/App.css` — deleted (no longer imported)
+  - ✅ Cleaned up unused assets (`react.svg`, `vite.svg`, `hero.png`)
 - **Files to create/modify**: None
 - **Dependencies**: All tasks 1.1–5.2
 - **Estimated lines changed**: 0
 - **Test strategy**: Full suite run
 - **Acceptance criteria**:
-  - `npx vitest run` exits with code 0 — all tests pass
-  - `npm run build` exits with code 0 — no TypeScript or Vite errors
-  - `npm run lint` exits with code 0 — no new lint violations
+  - ✅ `npx vitest run` exits with code 0 — all tests pass
+  - ✅ `npm run build` exits with code 0 — no TypeScript or Vite errors
+  - ✅ `npm run lint` exits with code 0 — no new lint violations
 
 ---
 
