@@ -33,7 +33,7 @@ describe('createLLMService', () => {
 
   describe('with valid API key', () => {
     beforeEach(() => {
-      vi.stubEnv('VITE_OPENAI_API_KEY', 'test-key')
+      vi.stubEnv('VITE_GROQ_API_KEY', 'test-key')
     })
 
     it('returns parsed GenerationResult on valid JSON', async () => {
@@ -116,14 +116,14 @@ describe('createLLMService', () => {
 
   describe('without API key', () => {
     beforeEach(() => {
-      vi.stubEnv('VITE_OPENAI_API_KEY', '')
+      vi.stubEnv('VITE_GROQ_API_KEY', '')
     })
 
-    it('stub rejects immediately without calling OpenAI', async () => {
+    it('stub rejects immediately without calling the API', async () => {
       const service = createLLMService()
       await expect(
         service.generateContent([{ role: 'user', content: 'test' }]),
-      ).rejects.toThrow('OpenAI API key not configured.')
+      ).rejects.toThrow('API key not configured.')
       expect(mockCreate).not.toHaveBeenCalled()
     })
   })

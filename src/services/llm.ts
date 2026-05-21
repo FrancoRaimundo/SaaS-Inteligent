@@ -11,44 +11,33 @@ interface LLMService {
   ): Promise<GenerationResult>
 }
 
-const JSON_SCHEMA = {
-  name: 'generated_content',
-  strict: true,
-  schema: {
-    type: 'object',
-    properties: {
-      tiktokScript: { type: 'string' },
-      instagramPost: { type: 'string' },
-      hashtags: { type: 'string' },
-    },
-    required: ['tiktokScript', 'instagramPost', 'hashtags'],
-    additionalProperties: false,
-  },
-} as const
+const GROQ_BASE_URL = 'https://api.groq.com/openai/v1'
+const GROQ_MODEL = 'llama-3.3-70b-versatile'
 
 export function createLLMService(): LLMService {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY
+  const apiKey = import.meta.env.VITE_GROQ_API_KEY
 
   if (!apiKey) {
     return {
       generateContent: () =>
-        Promise.reject(new Error('OpenAI API key not configured.')),
+        Promise.reject(new Error('API key not configured. Set VITE_GROQ_API_KEY in your .env file.')),
     }
   }
 
-  const client = new OpenAI({ apiKey, dangerouslyAllowBrowser: true })
+  const client = new OpenAI({
+    apiKey,
+    baseURL: GROQ_BASE_URL,
+    dangerouslyAllowBrowser: true,
+  })
 
   return {
     async generateContent(messages, signal) {
       try {
         const response = await client.chat.completions.create(
           {
-            model: 'gpt-4o-mini',
+            model: GROQ_MODEL,
             messages,
-            response_format: {
-              type: 'json_schema',
-              json_schema: JSON_SCHEMA,
-            },
+            response_format: { type: 'json_object' },
           },
           { signal },
         )
