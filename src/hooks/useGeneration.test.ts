@@ -12,7 +12,7 @@ vi.mock('../services/llm', () => ({
 
 describe('useGeneration', () => {
   beforeEach(() => {
-    vi.stubEnv('VITE_OPENAI_API_KEY', 'test-key')
+    vi.stubEnv('VITE_GROQ_API_KEY', 'test-key')
   })
 
   afterEach(() => {
