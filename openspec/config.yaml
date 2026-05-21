@@ -1,0 +1,71 @@
+# OpenSpec SDD Configuration
+schema: spec-driven
+
+context: |
+  Tech stack: Vite 8 + React 19 + TypeScript 6 + Tailwind CSS v4
+  Architecture: SPA with component-based UI under src/
+  Testing: vitest v4 + @testing-library/react + jsdom
+  Style: ESLint with typescript-eslint, typescript strict mode (noUnusedLocals, noUnusedParameters, verbatimModuleSyntax, erasableSyntaxOnly)
+  Persistence: hybrid (openspec files + Engram)
+
+strict_tdd: false
+
+testing:
+  runner:
+    framework: vitest
+    command: npx vitest
+    status: configured
+  layers:
+    unit:
+      available: true
+      tool: vitest + testing-library
+      status: configured
+    integration:
+      available: false
+      tool: "@testing-library/react"
+      status: pending
+    e2e:
+      available: false
+      tool: playwright
+      status: pending
+  coverage:
+    available: false
+    command: npx vitest --coverage
+    status: pending
+  quality:
+    linter:
+      available: true
+      tool: eslint
+      status: configured
+    type_checker:
+      available: true
+      tool: tsc -b
+      status: configured
+    formatter:
+      available: false
+      tool: prettier
+      status: pending
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - Scope must be narrow enough for single implementation session
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+  design:
+    - Include sequence diagrams for complex flows
+    - Document architecture decisions with rationale
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+  apply:
+    - Follow existing code patterns
+    tdd: false
+    test_command: npx vitest run
+  verify:
+    test_command: npx vitest run
+    build_command: "npm run build"
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas
